@@ -18,6 +18,22 @@
 		<module>xboot-app</module>
 		<module>xboot-core</module>
 	</modules>
+	
+	
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+			    <groupId>org.apache.shiro</groupId>
+			    <artifactId>shiro-spring</artifactId>
+			    <version>1.4.0</version>
+			</dependency>
+			<dependency>
+			    <groupId>com.baomidou</groupId>
+			    <artifactId>mybatis-plus-boot-starter</artifactId>
+			    <version>3.0.4</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 
 </project>
