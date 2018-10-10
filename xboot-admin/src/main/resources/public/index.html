@@ -11,12 +11,9 @@
 	<!-- JS -->
 	<script src="./assets/layui/layui.js"></script>
 	<script type="text/javascript">
-		layui.use(['layer', 'form'], function(){
-			  var layer = layui.layer
-			  ,form = layui.form;
-			  
-			  layer.msg('Hello World');
-			});
+		layui.config({
+		  base: './my/js/' //你存放新模块的目录，注意，不是layui的模块目录
+		}).use('index');
 	</script>
 </body>
 </html>
