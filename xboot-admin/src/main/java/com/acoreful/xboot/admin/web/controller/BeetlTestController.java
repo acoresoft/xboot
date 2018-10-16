@@ -1,4 +1,4 @@
-package com.acoreful.xboot.web.controller;
+package com.acoreful.xboot.admin.web.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;

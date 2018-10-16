@@ -13,7 +13,7 @@ import redis.clients.jedis.JedisPool;
 @Component
 public class JedisUtils {
 
-    @Resource 
+    @Resource
     private JedisPool jedisPool;
 
     /**
