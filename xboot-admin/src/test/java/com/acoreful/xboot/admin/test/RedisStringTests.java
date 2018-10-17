@@ -1,9 +1,8 @@
 package com.acoreful.xboot.admin.test;
 
-import static org.junit.Assert.*;
-
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.Cursor;
+import org.springframework.data.redis.core.DefaultTypedTuple;
 import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
@@ -236,9 +236,50 @@ public class RedisStringTests extends BaseTests{
 	//Redis的Set数据结构
 	@Test
 	public void testExample15() throws Exception {
-		String[] strarrays = new String[]{"strarr1","sgtarr2"};
+		String[] strarrays = new String[]{"strarr1","sgtarr2","strarr3","strarr4","strarr5"};
         System.out.println(stringRedisTemplate.opsForSet().add("setTest", strarrays));
         stringRedisTemplate.opsForSet().remove("setTest", "strarr1");
+        System.out.println(stringRedisTemplate.opsForSet().members("setTest"));
+        System.out.println(stringRedisTemplate.opsForSet().distinctRandomMembers("setTest", 2));
+        List<String> otherKey = new ArrayList<String>();
+        System.out.println(stringRedisTemplate.opsForSet().add("setTest2", new String[]{"strarr2","str2arr9","strarr5","str2arr7","str2arr6"}));
+        otherKey.add("setTest2");
+        System.out.println(stringRedisTemplate.opsForSet().members("setTest"));
+        System.out.println(stringRedisTemplate.opsForSet().members("setTest2"));
+        
+        System.out.println("difference---"+stringRedisTemplate.opsForSet().difference("setTest","setTest2"));
+        System.out.println(stringRedisTemplate.opsForSet().differenceAndStore("setTest",otherKey, "differenceAndStore2"));
+        System.out.println("differenceAndStore2:" + stringRedisTemplate.opsForSet().members("differenceAndStore2"));
+	}
+	//Redis的ZSet数据结构
+	@Test
+	public void testExample20() throws Exception {
+		ZSetOperations.TypedTuple<String> objectTypedTuple1 = new DefaultTypedTuple<String>("zset-1",1.1);
+		ZSetOperations.TypedTuple<String> objectTypedTuple2 = new DefaultTypedTuple<String>("zset-2",3.9);
+		ZSetOperations.TypedTuple<String> objectTypedTuple3 = new DefaultTypedTuple<String>("zset-3",2.6);
+        ZSetOperations.TypedTuple<String> objectTypedTuple4 = new DefaultTypedTuple<String>("zset-4",7.8);
+        ZSetOperations.TypedTuple<String> objectTypedTuple5 = new DefaultTypedTuple<String>("zset-5",9.9);
+        ZSetOperations.TypedTuple<String> objectTypedTuple6 = new DefaultTypedTuple<String>("zset-6",8.6);
+        Set<ZSetOperations.TypedTuple<String>> tuples = new HashSet<ZSetOperations.TypedTuple<String>>();
+        tuples.add(objectTypedTuple1);
+        tuples.add(objectTypedTuple2);
+        tuples.add(objectTypedTuple3);
+        tuples.add(objectTypedTuple4);
+        tuples.add(objectTypedTuple5);
+        tuples.add(objectTypedTuple6);
+        System.out.println(stringRedisTemplate.opsForZSet().add("zset1",tuples));
+        System.out.println(stringRedisTemplate.opsForZSet().range("zset1",0,-1));
+        System.out.println(stringRedisTemplate.opsForZSet().remove("zset1","zset-4"));
+        System.out.println(stringRedisTemplate.opsForZSet().range("zset1",0,-1));
+        //incrementScore 增加元素的score值，并返回增加后的值
+        System.out.println(stringRedisTemplate.opsForZSet().incrementScore("zset1","zset-1",1.1));
+        //返回有序集中指定成员的排名，其中有序集成员按分数值递增(从小到大)顺序排列
+        System.out.println(stringRedisTemplate.opsForZSet().range("zset1",0,-1));
+        System.out.println(stringRedisTemplate.opsForZSet().count("zset1",0,5));
+        System.out.println(stringRedisTemplate.opsForZSet().size("zset1"));
+        
+        System.out.println(stringRedisTemplate.opsForZSet().rank("zset1","zset-2"));
+        System.out.println(stringRedisTemplate.opsForZSet().zCard("zset1"));
 	}
 	@Test
 	public void testExample27() throws Exception {
