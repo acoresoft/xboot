@@ -7,7 +7,7 @@ import java.util.TreeSet;
 
 import org.springframework.data.redis.connection.DataType;
 import org.springframework.data.redis.core.ZSetOperations;
-
+@SuppressWarnings("unchecked")
 public interface BaseRedisDao<K, V> {
     /**
      * 用户排序通过注册时间的 权重值
@@ -71,7 +71,7 @@ public interface BaseRedisDao<K, V> {
      * @param obj
      * @return 返回在list中的下标
      */
-    long addList(K key,V ...obj);
+	long addList(K key,V ...obj);
     /**
      *
      * 输出list

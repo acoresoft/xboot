@@ -1,7 +1,5 @@
 package com.acoreful.xboot.admin.test;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -18,6 +16,10 @@ public class RedisAtomicClientTests extends BaseTests {
 		RedisLock lock = redisAtomicClient.getLock("lock-001", 10);
 		System.out.println();
 		;
+		if(lock!=null) {
+			
+		}
+		lock.unlock();
 	}
 
 	@Test

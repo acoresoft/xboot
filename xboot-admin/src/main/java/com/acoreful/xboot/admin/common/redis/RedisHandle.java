@@ -20,11 +20,12 @@ import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
 
-
+@SuppressWarnings("unchecked")
 @Repository("redisHandle")
 public class RedisHandle implements BaseRedisDao<String, Object> {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
-    @Resource()
+    @SuppressWarnings("rawtypes")
+	@Resource()
     protected RedisTemplate redisTemplate;
     /**
      * 出异常，重复操作的次数
@@ -37,7 +38,6 @@ public class RedisHandle implements BaseRedisDao<String, Object> {
     }
 
 
-    @SuppressWarnings("unchecked")
 	public Set<String> getAllKeys() {
         return redisTemplate.keys("*");
     }
