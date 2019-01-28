@@ -1,5 +1,6 @@
 package com.acoreful.xboot.admin.common.redis.lock;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -8,12 +9,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.connection.RedisConnection;
+import org.springframework.data.redis.connection.RedisStringCommands;
 import org.springframework.data.redis.core.RedisCallback;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
-
-import redis.clients.jedis.Jedis;
+import org.springframework.data.redis.core.types.Expiration;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
  
 /**
  * @Resource(name="stringRedisTemplate")
@@ -24,7 +25,6 @@ import redis.clients.jedis.Jedis;
 public class RedisAtomicClient {
     private static final Logger logger = LoggerFactory.getLogger(RedisAtomicClient.class);
  
-    private final RedisTemplate redisTemplate;
     private final StringRedisTemplate stringRedisTemplate;
  
  
@@ -42,11 +42,8 @@ public class RedisAtomicClient {
             "    return 0\n" +
             "end";
  
-    public RedisAtomicClient(RedisTemplate redisTemplate){
-        this.redisTemplate = redisTemplate;
-        this.stringRedisTemplate = new StringRedisTemplate();
-        this.stringRedisTemplate.setConnectionFactory(redisTemplate.getConnectionFactory());
-        this.stringRedisTemplate.afterPropertiesSet();
+    public RedisAtomicClient(StringRedisTemplate stringRedisTemplate){
+        this.stringRedisTemplate=stringRedisTemplate;
     }
  
     /**
@@ -84,11 +81,11 @@ public class RedisAtomicClient {
         String[] args = new String[2];
         args[0] = String.valueOf(delta);
         args[1] = String.valueOf(timeoutSeconds);
-        Object currentVal = stringRedisTemplate.execute(new DefaultRedisScript<>(INCR_BY_WITH_TIMEOUT, String.class), keys, args);
+        String currentVal = stringRedisTemplate.execute(new DefaultRedisScript<>(INCR_BY_WITH_TIMEOUT, String.class), keys, Arrays.asList(args).toArray());
  
-        if(currentVal instanceof Long){
+        /*if(currentVal instanceof Long){
             return (Long)currentVal;
-        }
+        }*/
         return Long.valueOf((String)currentVal);
     }
  
@@ -137,15 +134,17 @@ public class RedisAtomicClient {
  
         int maxTimes = maxRetryTimes + 1;
         for(int i = 0;i < maxTimes; i++) {
-            String status = stringRedisTemplate.execute(new RedisCallback<String>() {
+            Boolean status = stringRedisTemplate.execute(new RedisCallback<Boolean>() {
                 @Override
-                public String doInRedis(RedisConnection connection) throws DataAccessException {
-                    Jedis jedis = (Jedis) connection.getNativeConnection();
-                    String status = jedis.set(key, value, "nx", "ex", expireSeconds);
-                    return status;
+                public Boolean doInRedis(RedisConnection connection) throws DataAccessException {
+                	StringRedisSerializer serializer = new StringRedisSerializer();
+                	return connection.set(serializer.serialize(key),serializer.serialize(value), Expiration.from(expireSeconds, TimeUnit.SECONDS),RedisStringCommands.SetOption.SET_IF_ABSENT);
+                   /* Jedis jedis = (Jedis) connection.getNativeConnection();
+                    String status = jedis.set(key, value, "nx", "ex", expireSeconds);*/
+                    //return status;
                 }
             });
-            if ("OK".equals(status)) {//抢到锁
+            if (status) {//抢到锁
                 return new RedisLockInner(stringRedisTemplate, key, value);
             }
  
